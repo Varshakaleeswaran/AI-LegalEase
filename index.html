@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI LegalEase</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 40px; background: #f5f7fa; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #1a73e8; text-align: center; }
+        .upload-box { border: 3px dashed #1a73e8; padding: 40px; text-align: center; border-radius: 8px; margin: 30px 0; cursor: pointer; }
+        .upload-box p { margin: 0; font-size: 18px; color: #5f6368; }
+        #file-input { display: none; } /* Hide the default input */
+        button { background: #1a73e8; color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; cursor: pointer; display: block; margin: 20px auto; }
+        button:hover { background: #1557b0; }
+        #results, #chat-ui { display: none; } /* Hide these initially */
+        .clause { background: #f8f9fa; margin: 15px 0; padding: 15px; border-left: 4px solid #1a73e8; border-radius: 4px; }
+        .risky { border-left-color: #ea4335; background: #fce8e6; }
+        .chat-box { border: 1px solid #ddd; height: 200px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+        .user-msg { text-align: right; color: #1a73e8; }
+        .bot-msg { text-align: left; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI LegalEase</h1>
+        <p><strong>Disclaimer:</strong> This is a demo prototype for hackathon purposes only and does not constitute legal advice.</p>
+
+        <!-- UPLOAD SCREEN -->
+        <div id="upload-ui">
+            <div class="upload-box" onclick="document.getElementById('file-input').click()">
+                <p>📄 Click to upload a legal document (PDF)</p>
+            </div>
+            <input type="file" id="file-input" accept=".pdf" onchange="handleUpload()">
+            <button onclick="mockUpload()">👉 Or, Click Here for a Demo</button>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="results">
+            <h2>Document Analysis</h2>
+            <div id="clause-container">
+                <!-- Clauses will be inserted here by JavaScript -->
+            </div>
+
+            <!-- CHAT UI -->
+            <div id="chat-ui">
+                <h3>Ask a question about this document:</h3>
+                <div class="chat-box" id="chat-box">
+                    <div class="bot-msg">Hello! I'm your legal assistant. Ask me anything about the uploaded document.</div>
+                </div>
+                <input type="text" id="user-input" placeholder="Type your question here...">
+                <button onclick="askQuestion()">Ask</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // THIS IS THE CORE OF THE DEMO - PRE-WRITTEN CONTENT
+        const demoContent = {
+            clauses: [
+                {
+                    original: "The Lessee shall indemnify, defend, and hold harmless the Lessor from and against any and all claims, damages, losses, liabilities, and expenses arising out of any breach of this Agreement by the Lessee.",
+                    simplified: "If you (the tenant) break the rules of this agreement, you will be responsible for paying the landlord's legal fees and any other costs that result.",
+                    risk: "high"
+                },
+                {
+                    original: "This Agreement shall be effective commencing on the 1st day of January, 2024 and terminating on the 31st day of December, 2024.",
+                    simplified: "This rental agreement starts on January 1, 2024, and ends on December 31, 2024.",
+                    risk: "low"
+                },
+                {
+                    original: "Rent is due on the first day of each month. A late fee of 5% of the monthly rent shall be incurred for payments received after the 5th of the month.",
+                    simplified: "Pay your rent by the 1st of every month. If you pay after the 5th, you will be charged a 5% late fee.",
+                    risk: "medium"
+                }
+            ],
+            qa: {
+                "what is the late fee?": "The late fee is 5% of your monthly rent if you pay after the 5th of the month.",
+                "when does the lease end?": "The lease ends on December 31, 2024.",
+                "what happens if i break something?": "The clause about 'indemnification' means you could be responsible for the landlord's costs if you break the agreement. This is a potentially high-risk term.",
+                "hello": "Hello! How can I help you understand this document?",
+                "hi": "Hello! How can I help you understand this document?"
+            }
+        };
+
+        // Function to handle a real file upload (does nothing in this demo)
+        function handleUpload() {
+            alert("In a full version, this would process your PDF. For the demo, please click the 'Demo' button.");
+            document.getElementById('file-input').value = ''; // Reset the input
+        }
+
+        // THE MOST IMPORTANT FUNCTION - This triggers the demo
+        function mockUpload() {
+            // 1. Hide the upload screen, show the results
+            document.getElementById('upload-ui').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('chat-ui').style.display = 'block';
+
+            // 2. Display the pre-written clauses
+            const container = document.getElementById('clause-container');
+            container.innerHTML = ''; // Clear it first
+
+            demoContent.clauses.forEach(clause => {
+                const clauseDiv = document.createElement('div');
+                clauseDiv.className = `clause ${clause.risk}`;
+                clauseDiv.innerHTML = `
+                    <p><strong>Original:</strong> <em>"${clause.original}"</em></p>
+                    <p><strong>Simplified:</strong> ${clause.simplified}</p>
+                    <p><strong>Risk Level:</strong> <span class="risk-${clause.risk}">${clause.risk.toUpperCase()}</span></p>
+                `;
+                container.appendChild(clauseDiv);
+            });
+        }
+
+        // Function to handle the chatbot Q&A
+        function askQuestion() {
+            const userInput = document.getElementById('user-input').value.toLowerCase();
+            const chatBox = document.getElementById('chat-box');
+
+            // Add user's question to chat
+            chatBox.innerHTML += `<div class="user-msg"><strong>You:</strong> ${userInput}</div>`;
+
+            // Find an answer or give a default response
+            let answer = demoContent.qa[userInput] || "I'm not sure about that based on the document. Please consult a human lawyer for specific advice.";
+            chatBox.innerHTML += `<div class="bot-msg"><strong>Assistant:</strong> ${answer}</div>`;
+
+            // Clear input and scroll to bottom of chat
+            document.getElementById('user-input').value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        // Allow user to press Enter to ask a question
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                askQuestion();
+            }
+        });
+    </script>
+</body>
+</html>
